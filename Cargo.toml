@@ -1,0 +1,18 @@
+[package]
+name = "multiaddr"
+version = "0.1.0"
+authors = ["Micxjo Funkcio <micxjo@fastmail.com>"]
+license = "MIT"
+build = "build.rs"
+
+[dependencies]
+clippy = { version = "*", optional = true }
+
+[build-dependencies]
+skeptic = "^0.4.0"
+
+[dev-dependencies]
+skeptic = "^0.4.0"
+
+[features]
+default = []
