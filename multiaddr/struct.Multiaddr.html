@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `Multiaddr` struct in crate `multiaddr`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, Multiaddr">
+
+    <title>multiaddr::Multiaddr - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../main.css">
+
+    
+    
+</head>
+<body class="rustdoc">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'><a href='index.html'>multiaddr</a></p><script>window.sidebarCurrent = {name: 'Multiaddr', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content struct">
+<h1 class='fqn'><span class='in-band'>Struct <a href='index.html'>multiaddr</a>::<wbr><a class='struct' href=''>Multiaddr</a></span><span class='out-of-band'><span id='render-detail'>
+            <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                [<span class='inner'>&#x2212;</span>]
+            </a>
+        </span><a id='src-230' class='srclink' href='../src/multiaddr/lib.rs.html#202-204' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct Multiaddr {
+    // some fields omitted
+}</pre><div class='docblock'><p>A multiaddr compatible network address.</p>
+</div><h2 id='methods'>Methods</h2><h3 class='impl'><code>impl <a class='struct' href='../multiaddr/struct.Multiaddr.html' title='multiaddr::Multiaddr'>Multiaddr</a></code></h3><div class='impl-items'><h4 id='method.new' class='method'><code>fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class='struct' href='../multiaddr/struct.Multiaddr.html' title='multiaddr::Multiaddr'>Multiaddr</a></code></h4>
+<div class='docblock'><p>Creates an empty <code>Multiaddr</code>.</p>
+</div><h4 id='method.from_parts' class='method'><code>fn <a href='#method.from_parts' class='fnname'>from_parts</a>(parts: <a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='enum' href='../multiaddr/enum.Addr.html' title='multiaddr::Addr'>Addr</a>&gt;) -&gt; <a class='struct' href='../multiaddr/struct.Multiaddr.html' title='multiaddr::Multiaddr'>Multiaddr</a></code></h4>
+<div class='docblock'><p>Creates a <code>Multiaddr</code> from a series of address parts.</p>
+</div><h4 id='method.parts' class='method'><code>fn <a href='#method.parts' class='fnname'>parts</a>(&amp;self) -&gt; &amp;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='enum' href='../multiaddr/enum.Addr.html' title='multiaddr::Addr'>Addr</a>&gt;</code></h4>
+<div class='docblock'><p>Gets an ordered list of address parts.</p>
+
+<h1 id='examples' class='section-header'><a href='#examples'>Examples</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>multiaddr</span>::{<span class='ident'>Multiaddr</span>, <span class='ident'>Addr</span>};
+
+<span class='kw'>let</span> <span class='ident'>ma</span> <span class='op'>=</span> <span class='string'>&quot;/ip6/2001:db8:85a3::39/tcp/80&quot;</span>.<span class='ident'>parse</span>::<span class='op'>&lt;</span><span class='ident'>Multiaddr</span><span class='op'>&gt;</span>().<span class='ident'>unwrap</span>();
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ma</span>.<span class='ident'>parts</span>().<span class='ident'>len</span>(), <span class='number'>2</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>ma</span>.<span class='ident'>parts</span>()[<span class='number'>1</span>], <span class='ident'>Addr</span>::<span class='ident'>Tcp</span>(<span class='number'>80</span>));</pre>
+</div><h4 id='method.encapsulate' class='method'><code>fn <a href='#method.encapsulate' class='fnname'>encapsulate</a>(&amp;self, other: &amp;<a class='struct' href='../multiaddr/struct.Multiaddr.html' title='multiaddr::Multiaddr'>Multiaddr</a>) -&gt; <a class='struct' href='../multiaddr/struct.Multiaddr.html' title='multiaddr::Multiaddr'>Multiaddr</a></code></h4>
+<div class='docblock'><p>Wraps <code>other</code>.</p>
+
+<h1 id='examples-1' class='section-header'><a href='#examples-1'>Examples</a></h1><pre class='rust rust-example-rendered'>
+<span class='kw'>use</span> <span class='ident'>multiaddr</span>::<span class='ident'>Multiaddr</span>;
+
+<span class='kw'>let</span> <span class='ident'>foo</span> <span class='op'>=</span> <span class='string'>&quot;/ip4/127.0.0.1/tcp/1723&quot;</span>.<span class='ident'>parse</span>::<span class='op'>&lt;</span><span class='ident'>Multiaddr</span><span class='op'>&gt;</span>().<span class='ident'>unwrap</span>();
+<span class='kw'>let</span> <span class='ident'>bar</span> <span class='op'>=</span> <span class='string'>&quot;/ip4/1.2.3.4/udp/30&quot;</span>.<span class='ident'>parse</span>::<span class='op'>&lt;</span><span class='ident'>Multiaddr</span><span class='op'>&gt;</span>().<span class='ident'>unwrap</span>();
+<span class='kw'>let</span> <span class='ident'>proxied</span> <span class='op'>=</span> <span class='ident'>foo</span>.<span class='ident'>encapsulate</span>(<span class='kw-2'>&amp;</span><span class='ident'>bar</span>);
+<span class='macro'>assert_eq</span><span class='macro'>!</span>(<span class='ident'>proxied</span>.<span class='ident'>to_string</span>(),
+           <span class='string'>&quot;/ip4/127.0.0.1/tcp/1723/ip4/1.2.3.4/udp/30&quot;</span>);</pre>
+</div><h4 id='method.encapsulate_mut' class='method'><code>fn <a href='#method.encapsulate_mut' class='fnname'>encapsulate_mut</a>(&amp;mut self, other: &amp;<a class='struct' href='../multiaddr/struct.Multiaddr.html' title='multiaddr::Multiaddr'>Multiaddr</a>)</code></h4>
+<div class='docblock'><p>Wraps <code>other</code>, in place.</p>
+</div><h4 id='method.write' class='method'><code>fn <a href='#method.write' class='fnname'>write</a>&lt;T: <a class='trait' href='https://doc.rust-lang.org/nightly/std/io/trait.Write.html' title='std::io::Write'>Write</a>&gt;(&amp;self, w: &amp;mut T) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.tuple.html'>()</a>, <a class='struct' href='https://doc.rust-lang.org/nightly/std/io/error/struct.Error.html' title='std::io::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Writes a multiaddr in the standard binary encoding scheme.</p>
+</div><h4 id='method.to_bytes' class='method'><code>fn <a href='#method.to_bytes' class='fnname'>to_bytes</a>(&amp;self) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='https://doc.rust-lang.org/nightly/collections/vec/struct.Vec.html' title='collections::vec::Vec'>Vec</a>&lt;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a>&gt;, <a class='struct' href='https://doc.rust-lang.org/nightly/std/io/error/struct.Error.html' title='std::io::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Encodes a multiaddr to the standard binary encoding scheme.</p>
+</div><h4 id='method.from_bytes' class='method'><code>fn <a href='#method.from_bytes' class='fnname'>from_bytes</a>(buf: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.u8.html'>u8</a><a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>]</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;<a class='struct' href='../multiaddr/struct.Multiaddr.html' title='multiaddr::Multiaddr'>Multiaddr</a>, <a class='struct' href='https://doc.rust-lang.org/nightly/std/io/error/struct.Error.html' title='std::io::error::Error'>Error</a>&gt;</code></h4>
+<div class='docblock'><p>Decodes a multiaddr encoded in the standard binary encoding scheme.</p>
+</div><h4 id='method.is_empty' class='method'><code>fn <a href='#method.is_empty' class='fnname'>is_empty</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Returns true if the multiaddr doesn&#39;t contain any address parts.</p>
+</div><h4 id='method.contains_ipv4' class='method'><code>fn <a href='#method.contains_ipv4' class='fnname'>contains_ipv4</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Returns true if the multiaddr contains at least one IPv4 part.</p>
+</div><h4 id='method.contains_ipv6' class='method'><code>fn <a href='#method.contains_ipv6' class='fnname'>contains_ipv6</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Returns true if the multiaddr contains at least one IPv6 part.</p>
+</div><h4 id='method.contains_tcp' class='method'><code>fn <a href='#method.contains_tcp' class='fnname'>contains_tcp</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Returns true if the multiaddr contains at least one TCP part.</p>
+</div><h4 id='method.contains_udp' class='method'><code>fn <a href='#method.contains_udp' class='fnname'>contains_udp</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Returns true if the multiaddr contains at least one UDP part.</p>
+</div><h4 id='method.contains_dccp' class='method'><code>fn <a href='#method.contains_dccp' class='fnname'>contains_dccp</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Returns true if the multiaddr contains at least one DCCP part.</p>
+</div><h4 id='method.contains_ipfs' class='method'><code>fn <a href='#method.contains_ipfs' class='fnname'>contains_ipfs</a>(&amp;self) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<div class='docblock'><p>Returns true if the multiaddr contains at least one IPFS part.</p>
+</div></div><h2 id='implementations'>Trait Implementations</h2><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html' title='core::fmt::Display'>Display</a> for <a class='struct' href='../multiaddr/struct.Multiaddr.html' title='multiaddr::Multiaddr'>Multiaddr</a></code></h3><div class='impl-items'><h4 id='method.fmt' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html#method.fmt' class='fnname'>fmt</a>(&amp;self, f: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/str/trait.FromStr.html' title='core::str::FromStr'>FromStr</a> for <a class='struct' href='../multiaddr/struct.Multiaddr.html' title='multiaddr::Multiaddr'>Multiaddr</a></code></h3><div class='impl-items'><h4 id='assoc_type.Err' class='type'><code>type Err = <a class='enum' href='../multiaddr/enum.MultiaddrParseError.html' title='multiaddr::MultiaddrParseError'>MultiaddrParseError</a></code></h4>
+<h4 id='method.from_str' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/str/trait.FromStr.html#method.from_str' class='fnname'>from_str</a>(s: &amp;<a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.str.html'>str</a>) -&gt; <a class='enum' href='https://doc.rust-lang.org/nightly/core/result/enum.Result.html' title='core::result::Result'>Result</a>&lt;Self, Self::<a class='trait' href='https://doc.rust-lang.org/nightly/core/str/trait.FromStr.html' title='core::str::FromStr'>Err</a>&gt;</code></h4>
+</div><h3 id='derived_implementations'>Derived Implementations </h3><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html' title='core::hash::Hash'>Hash</a> for <a class='struct' href='../multiaddr/struct.Multiaddr.html' title='multiaddr::Multiaddr'>Multiaddr</a></code></h3><div class='impl-items'><h4 id='method.hash' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html#method.hash' class='fnname'>hash</a>&lt;__H: <a class='trait' href='https://doc.rust-lang.org/nightly/core/hash/trait.Hasher.html' title='core::hash::Hasher'>Hasher</a>&gt;(&amp;self, __arg_0: &amp;mut __H)</code></h4>
+<h4 id='method.hash_slice' class='method'><span class="since">1.3.0</span><code>fn <a href='https://doc.rust-lang.org/nightly/core/hash/trait.Hash.html#method.hash_slice' class='fnname'>hash_slice</a>&lt;H&gt;(data: <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.slice.html'>&amp;[Self]</a>, state: &amp;mut H) <span class='where'>where H: <a class='trait' href='https://doc.rust-lang.org/nightly/core/hash/trait.Hasher.html' title='core::hash::Hasher'>Hasher</a></span></code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html' title='core::clone::Clone'>Clone</a> for <a class='struct' href='../multiaddr/struct.Multiaddr.html' title='multiaddr::Multiaddr'>Multiaddr</a></code></h3><div class='impl-items'><h4 id='method.clone' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone' class='fnname'>clone</a>(&amp;self) -&gt; <a class='struct' href='../multiaddr/struct.Multiaddr.html' title='multiaddr::Multiaddr'>Multiaddr</a></code></h4>
+<h4 id='method.clone_from' class='method'><span class="since">1.0.0</span><code>fn <a href='https://doc.rust-lang.org/nightly/core/clone/trait.Clone.html#method.clone_from' class='fnname'>clone_from</a>(&amp;mut self, source: &amp;Self)</code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html' title='core::cmp::PartialEq'>PartialEq</a> for <a class='struct' href='../multiaddr/struct.Multiaddr.html' title='multiaddr::Multiaddr'>Multiaddr</a></code></h3><div class='impl-items'><h4 id='method.eq' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.eq' class='fnname'>eq</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../multiaddr/struct.Multiaddr.html' title='multiaddr::Multiaddr'>Multiaddr</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+<h4 id='method.ne' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/cmp/trait.PartialEq.html#method.ne' class='fnname'>ne</a>(&amp;self, __arg_0: &amp;<a class='struct' href='../multiaddr/struct.Multiaddr.html' title='multiaddr::Multiaddr'>Multiaddr</a>) -&gt; <a class='primitive' href='https://doc.rust-lang.org/nightly/std/primitive.bool.html'>bool</a></code></h4>
+</div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/cmp/trait.Eq.html' title='core::cmp::Eq'>Eq</a> for <a class='struct' href='../multiaddr/struct.Multiaddr.html' title='multiaddr::Multiaddr'>Multiaddr</a></code></h3><div class='impl-items'></div><h3 class='impl'><code>impl <a class='trait' href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html' title='core::fmt::Debug'>Debug</a> for <a class='struct' href='../multiaddr/struct.Multiaddr.html' title='multiaddr::Multiaddr'>Multiaddr</a></code></h3><div class='impl-items'><h4 id='method.fmt-1' class='method'><code>fn <a href='https://doc.rust-lang.org/nightly/core/fmt/trait.Debug.html#method.fmt' class='fnname'>fmt</a>(&amp;self, __arg_0: &amp;mut <a class='struct' href='https://doc.rust-lang.org/nightly/core/fmt/struct.Formatter.html' title='core::fmt::Formatter'>Formatter</a>) -&gt; <a class='type' href='https://doc.rust-lang.org/nightly/core/fmt/type.Result.html' title='core::fmt::Result'>Result</a></code></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../";
+        window.currentCrate = "multiaddr";
+        window.playgroundUrl = "";
+    </script>
+    <script src="../jquery.js"></script>
+    <script src="../main.js"></script>
+    
+    <script defer src="../search-index.js"></script>
+</body>
+</html>

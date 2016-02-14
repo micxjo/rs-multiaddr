@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Addr","An individual component of a `Multiaddr`."],["MultiaddrParseError","An error returned when parsing a `Multiaddr`."]],"struct":[["Multiaddr","A multiaddr compatible network address."]]});
