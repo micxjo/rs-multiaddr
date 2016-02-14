@@ -15,22 +15,18 @@ pub fn read_varint_u64<T: Read>(r: &mut T) -> Result<u64, Error> {
     Ok(value)
 }
 
-pub fn write_varint_u64<T: Write>(w: &mut T,
-                                  value: u64)
-                                  -> Result<usize, Error> {
+pub fn write_varint_u64<T: Write>(w: &mut T, value: u64) -> Result<(), Error> {
     let mut value = value;
     let mut buf = [0; 1];
-    let mut count = 0;
     while value >= 0b10000000 {
         buf[0] = (value | 0b10000000) as u8;
         try!(w.write_all(&buf[..]));
-        count += 1;
         value = value >> 7;
     }
 
     buf[0] = (value & 0b01111111) as u8;
     try!(w.write_all(&buf[..]));
-    Ok(count + 1)
+    Ok(())
 }
 
 #[cfg(test)]

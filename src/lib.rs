@@ -32,6 +32,10 @@ pub enum Addr {
     Dccp(u16),
     /// An IPFS peer ID.
     Ipfs(String),
+    /// An HTTP reference
+    Http,
+    /// An HTTPS reference.
+    Https,
 }
 
 use Addr::*;
@@ -85,6 +89,22 @@ impl Addr {
         }
     }
 
+    /// Returns true if this is an HTTP reference.
+    pub fn is_http(&self) -> bool {
+        match *self {
+            Http => true,
+            _ => false,
+        }
+    }
+
+    /// Returns true if this is an HTTPS reference.
+    pub fn is_https(&self) -> bool {
+        match *self {
+            Https => true,
+            _ => false,
+        }
+    }
+
     fn write<T: Write>(&self, w: &mut T) -> Result<(), Error> {
         match *self {
             Ipv4(ip) => {
@@ -123,6 +143,8 @@ impl Addr {
                     Err(Error::new(ErrorKind::InvalidData, "invalid base58"))
                 }
             }
+            Http => write_varint_u64(w, 480),
+            Https => write_varint_u64(w, 443),
         }
     }
 
@@ -176,6 +198,8 @@ impl Addr {
                 let addr = bytes.to_base58();
                 Ok(Ipfs(addr))
             }
+            480 => Ok(Http),
+            483 => Ok(Https),
             _ => {
                 Err(Error::new(ErrorKind::InvalidData,
                                format!("bad protocol code: {}", code)))
@@ -193,6 +217,8 @@ impl fmt::Display for Addr {
             Udp(port) => write!(f, "/udp/{}", port),
             Dccp(port) => write!(f, "/dccp/{}", port),
             Ipfs(ref id) => write!(f, "/ipfs/{}", id),
+            Http => write!(f, "/http"),
+            Https => write!(f, "/https"),
         }
     }
 }
@@ -314,6 +340,16 @@ impl Multiaddr {
     pub fn contains_ipfs(&self) -> bool {
         self.parts.iter().any(Addr::is_ipfs)
     }
+
+    /// Returns true if the multiaddr contains at least one HTTP part.
+    pub fn contains_http(&self) -> bool {
+        self.parts.iter().any(Addr::is_http)
+    }
+
+    /// Returns true if the multiaddr contains at least one HTTPS part.
+    pub fn contains_https(&self) -> bool {
+        self.parts.iter().any(Addr::is_https)
+    }
 }
 
 impl fmt::Display for Multiaddr {
@@ -403,6 +439,16 @@ impl str::FromStr for Multiaddr {
                     break;
                 }
                 return Err(MissingChunk("protocol descriptor".to_owned()));
+            }
+
+            if typ == "http" {
+                parts.push(Http);
+                continue;
+            }
+
+            if typ == "https" {
+                parts.push(Https);
+                continue;
             }
 
             if let Some(addr) = split.next() {
@@ -518,6 +564,21 @@ mod tests {
                    "/ipfs/QmSoLueR4xBeUbY9WZ9xGUUxunbKWcrNFTDAadQJmocnWm");
     }
 
+    #[test]
+    fn parses_http_address() {
+        let ma = Multiaddr::from_parts(vec![Addr::Http]);
+        let parsed = Multiaddr::from_str("/http").unwrap();
+        assert_eq!(parsed, ma);
+        assert_eq!(parsed.to_string(), "/http");
+    }
+
+    #[test]
+    fn parses_https_address() {
+        let ma = Multiaddr::from_parts(vec![Addr::Https]);
+        let parsed = Multiaddr::from_str("/https").unwrap();
+        assert_eq!(parsed, ma);
+        assert_eq!(parsed.to_string(), "/https");
+    }
 
     #[test]
     fn parses_mixed_address() {
