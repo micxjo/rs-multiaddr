@@ -2,6 +2,10 @@
 
 A [multiaddr](https://github.com/jbenet/multiaddr) library for Rust. Tested against stable and beta rust, but should work with nightlies as well.
 
+## Examples
+
+The examples in this `README` are automatically tested using the awesome [Rust Skeptic](https://github.com/brson/rust-skeptic) tool.
+
 ```rust
 extern crate multiaddr;
 use multiaddr::*;
@@ -18,6 +22,12 @@ fn main() {
 	assert_eq!(addr.parts()[1].to_string(), "/tcp/80");
 	assert_eq!(addr.to_string(), "/ip4/127.0.0.1/tcp/80");
 
+	// Binary encoding
+	let encoded: Vec<u8> = addr.to_bytes().unwrap();
+	let decoded = Multiaddr::from_bytes(&encoded[..]).unwrap();
+	assert_eq!(decoded, addr);
+
+	// Encapsulation
 	let proxy = "/ip6/2001::1/udp/5938".parse::<Multiaddr>().unwrap();
 	let proxied = proxy.encapsulate(&addr);
 

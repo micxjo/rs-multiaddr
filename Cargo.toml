@@ -6,6 +6,7 @@ license = "MIT"
 build = "build.rs"
 
 [dependencies]
+rust-base58 = "^0.0.4"
 clippy = { version = "*", optional = true }
 
 [build-dependencies]

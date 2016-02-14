@@ -1,11 +1,21 @@
 #![warn(missing_docs)]
 #![cfg_attr(feature="clippy", feature(plugin))]
 #![cfg_attr(feature="clippy", plugin(clippy))]
-//! An implementation of the multiaddr network address standard.
+//! An implementation of the [multiaddr](https://github.com/jbenet/multiaddr)
+//! network address standard.
 
-use std::{str, fmt, error};
+extern crate rust_base58;
+
+mod varint;
+
+use std::{str, fmt, error, mem};
+use std::io::{Read, Write, Cursor, Error, ErrorKind};
 use std::net::{Ipv4Addr, Ipv6Addr, AddrParseError};
 use std::num::ParseIntError;
+
+use rust_base58::{FromBase58, ToBase58};
+
+use varint::{write_varint_u64, read_varint_u64};
 
 /// An individual component of a `Multiaddr`.
 #[derive(Debug, Eq, PartialEq, Clone, Hash)]
@@ -62,6 +72,93 @@ impl Addr {
         match *self {
             Ipfs(_) => true,
             _ => false,
+        }
+    }
+
+    fn write<T: Write>(&self, w: &mut T) -> Result<(), Error> {
+        match *self {
+            Ipv4(ip) => {
+                try!(write_varint_u64(w, 4));
+                w.write_all(&ip.octets()[..])
+            }
+            Ipv6(ip) => {
+                try!(write_varint_u64(w, 41));
+                let segments = ip.segments();
+                unsafe {
+                    let bytes = mem::transmute::<[u16; 8], [u8; 16]>(segments);
+                    w.write_all(&bytes[..])
+                }
+            }
+            Tcp(port) => {
+                try!(write_varint_u64(w, 6));
+                let bytes: [u8; 2] = [(port >> 8) as u8, (port & 0xFF) as u8];
+                w.write_all(&bytes)
+            }
+            Udp(port) => {
+                try!(write_varint_u64(w, 17));
+                let bytes: [u8; 2] = [(port >> 8) as u8, (port & 0xFF) as u8];
+                w.write_all(&bytes)
+            }
+            Ipfs(ref addr) => {
+                try!(write_varint_u64(w, 421));
+                if let Ok(bytes) = addr.from_base58() {
+                    try!(write_varint_u64(w, bytes.len() as u64));
+                    w.write_all(&bytes[..])
+                } else {
+                    Err(Error::new(ErrorKind::InvalidData, "invalid base58"))
+                }
+            }
+        }
+    }
+
+    fn read<T: Read>(r: &mut T) -> Result<Addr, Error> {
+        let code = try!(read_varint_u64(r));
+        match code {
+            4 => {
+                let mut bytes = [0; 4];
+                try!(r.read_exact(&mut bytes[..]));
+                let ip = Ipv4Addr::new(bytes[0], bytes[1], bytes[2], bytes[3]);
+                Ok(Ipv4(ip))
+            }
+            41 => {
+                let mut bytes = [0; 16];
+                try!(r.read_exact(&mut bytes[..]));
+                let segments: [u16; 8] = unsafe {
+                    mem::transmute::<[u8; 16], [u16; 8]>(bytes)
+                };
+                let ip = Ipv6Addr::new(segments[0],
+                                       segments[1],
+                                       segments[2],
+                                       segments[3],
+                                       segments[4],
+                                       segments[5],
+                                       segments[6],
+                                       segments[7]);
+                Ok(Ipv6(ip))
+            }
+            6 => {
+                let mut bytes = [0; 2];
+                try!(r.read_exact(&mut bytes[..]));
+                let port = (bytes[0] as u16) << 8 | bytes[1] as u16;
+                Ok(Tcp(port))
+            }
+            17 => {
+                let mut bytes = [0; 2];
+                try!(r.read_exact(&mut bytes[..]));
+                let port = (bytes[0] as u16) << 8 | bytes[1] as u16;
+                Ok(Udp(port))
+            }
+            421 => {
+                let len = try!(read_varint_u64(r));
+                let mut bytes = vec![0; len as usize];
+                try!(r.read_exact(&mut bytes[..]));
+                let addr = bytes.to_base58();
+                Ok(Ipfs(addr))
+            }
+            _ => {
+                Err(Error::new(ErrorKind::InvalidData,
+                               format!("bad protocol code: {}", code)))
+            }
         }
     }
 }
@@ -134,6 +231,33 @@ impl Multiaddr {
         self.parts.extend_from_slice(&other.parts[..]);
     }
 
+    /// Writes a multiaddr in the standard binary encoding scheme.
+    pub fn write<T: Write>(&self, w: &mut T) -> Result<(), Error> {
+        for part in &self.parts {
+            try!(part.write(w));
+        }
+        Ok(())
+    }
+
+    /// Encodes a multiaddr to the standard binary encoding scheme.
+    pub fn to_bytes(&self) -> Result<Vec<u8>, Error> {
+        let mut buf = Cursor::new(Vec::new());
+        try!(self.write(&mut buf));
+        Ok(buf.into_inner())
+    }
+
+    /// Decodes a multiaddr encoded in the standard binary encoding scheme.
+    pub fn from_bytes(buf: &[u8]) -> Result<Multiaddr, Error> {
+        let len = buf.len();
+        let mut cursor = Cursor::new(buf);
+        let mut parts = Vec::new();
+        while cursor.position() < len as u64 {
+            let part = try!(Addr::read(&mut cursor));
+            parts.push(part);
+        }
+        Ok(Multiaddr { parts: parts })
+    }
+
     /// Returns true if the multiaddr doesn't contain any address parts.
     pub fn is_empty(&self) -> bool {
         self.parts.is_empty()
@@ -191,7 +315,7 @@ pub enum MultiaddrParseError {
     InvalidPort(ParseIntError),
 }
 
-pub use MultiaddrParseError::*;
+use MultiaddrParseError::*;
 
 impl fmt::Display for MultiaddrParseError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -276,6 +400,7 @@ impl str::FromStr for Multiaddr {
                         let port = try!(addr.parse::<u16>());
                         parts.push(Udp(port));
                     }
+                    // TODO: do some validation on the IPFS hash
                     "ipfs" => parts.push(Ipfs(addr.to_owned())),
                     _ => {
                         return Err(InvalidProtocol(typ.to_owned()));
@@ -291,8 +416,8 @@ impl str::FromStr for Multiaddr {
 
 #[cfg(test)]
 mod tests {
-    use super::{Multiaddr, Addr, InvalidPort, InvalidProtocol, InvalidIp,
-                MissingChunk};
+    use super::{Multiaddr, Addr};
+    use super::MultiaddrParseError::*;
     use std::net::{Ipv4Addr, Ipv6Addr};
     use std::str::FromStr;
 
@@ -426,5 +551,16 @@ mod tests {
             Err(InvalidPort(_)) => {}
             _ => panic!("shouldn't parse /udp/65536 (overflow)"),
         }
+    }
+
+    #[test]
+    fn binary_read_write() {
+        let ma = Multiaddr::from_str("/ip4/8.9.29.\
+                                      40/udp/80/ipfs/QmSoLueR4xBeUbY9WZ9xGUUx\
+                                      unbKWcrNFTDAadQJmocnWm")
+                     .unwrap();
+        let enc = ma.to_bytes().unwrap();
+        let dec = Multiaddr::from_bytes(&enc[..]).unwrap();
+        assert_eq!(dec, ma);
     }
 }
