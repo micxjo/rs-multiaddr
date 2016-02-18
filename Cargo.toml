@@ -1,8 +1,14 @@
 [package]
 name = "multiaddr"
+description = "An implementation of the multiaddr network address format"
 version = "0.1.0"
 authors = ["Micxjo Funkcio <micxjo@fastmail.com>"]
 license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/micxjo/rust-multiaddr"
+repository = "https://github.com/micxjo/rust-multiaddr"
+documentation = "https://micxjo.github.io/rust-multiaddr"
+keywords = ["networking", "web", "encoding"]
 build = "build.rs"
 
 [dependencies]

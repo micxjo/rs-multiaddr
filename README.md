@@ -1,6 +1,6 @@
-# rs-multiaddr
+# rust-multiaddr
 
-[![Build Status](https://travis-ci.org/micxjo/rs-multiaddr.svg?branch=master)](https://travis-ci.org/micxjo/rs-multiaddr)
+[![Build Status](https://travis-ci.org/micxjo/rust-multiaddr.svg?branch=master)](https://travis-ci.org/micxjo/rust-multiaddr)
 
 A [multiaddr](https://github.com/jbenet/multiaddr) library for Rust. Tested against stable and beta rust, but should work with nightlies as well.
 
