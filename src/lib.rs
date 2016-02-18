@@ -30,6 +30,8 @@ pub enum Addr {
     Udp(u16),
     /// A DCCP port.
     Dccp(u16),
+    /// An SCTP port.
+    Sctp(u16),
     /// An IPFS peer ID.
     Ipfs(String),
     /// An HTTP reference
@@ -77,6 +79,14 @@ impl Addr {
     pub fn is_dccp(&self) -> bool {
         match *self {
             Dccp(_) => true,
+            _ => false,
+        }
+    }
+
+    /// Returns true if this is an SCTP port.
+    pub fn is_sctp(&self) -> bool {
+        match *self {
+            Sctp(_) => true,
             _ => false,
         }
     }
@@ -131,6 +141,11 @@ impl Addr {
             }
             Dccp(port) => {
                 try!(write_varint_u64(w, 33));
+                let bytes: [u8; 2] = [(port >> 8) as u8, (port & 0xFF) as u8];
+                w.write_all(&bytes)
+            }
+            Sctp(port) => {
+                try!(write_varint_u64(w, 132));
                 let bytes: [u8; 2] = [(port >> 8) as u8, (port & 0xFF) as u8];
                 w.write_all(&bytes)
             }
@@ -191,6 +206,12 @@ impl Addr {
                 let port = (bytes[0] as u16) << 8 | bytes[1] as u16;
                 Ok(Dccp(port))
             }
+            132 => {
+                let mut bytes = [0; 2];
+                try!(r.read_exact(&mut bytes[..]));
+                let port = (bytes[0] as u16) << 8 | bytes[1] as u16;
+                Ok(Sctp(port))
+            }
             421 => {
                 let len = try!(read_varint_u64(r));
                 let mut bytes = vec![0; len as usize];
@@ -216,6 +237,7 @@ impl fmt::Display for Addr {
             Tcp(port) => write!(f, "/tcp/{}", port),
             Udp(port) => write!(f, "/udp/{}", port),
             Dccp(port) => write!(f, "/dccp/{}", port),
+            Sctp(port) => write!(f, "/sctp/{}", port),
             Ipfs(ref id) => write!(f, "/ipfs/{}", id),
             Http => write!(f, "/http"),
             Https => write!(f, "/https"),
@@ -334,6 +356,11 @@ impl Multiaddr {
     /// Returns true if the multiaddr contains at least one DCCP part.
     pub fn contains_dccp(&self) -> bool {
         self.parts.iter().any(Addr::is_dccp)
+    }
+
+    /// Returns true if the multiaddr contains at least one SCTP part.
+    pub fn contains_sctp(&self) -> bool {
+        self.parts.iter().any(Addr::is_sctp)
     }
 
     /// Returns true if the multiaddr contains at least one IPFS part.
@@ -477,6 +504,10 @@ impl str::FromStr for Multiaddr {
                         let port = try!(addr.parse::<u16>());
                         parts.push(Dccp(port));
                     }
+                    "sctp" => {
+                        let port = try!(addr.parse::<u16>());
+                        parts.push(Sctp(port));
+                    }
                     // TODO: do some validation on the IPFS hash
                     "ipfs" => parts.push(Ipfs(addr.to_owned())),
                     _ => {
@@ -550,6 +581,14 @@ mod tests {
         let parsed = Multiaddr::from_str("/dccp/593").unwrap();
         assert_eq!(parsed, ma);
         assert_eq!(parsed.to_string(), "/dccp/593");
+    }
+
+    #[test]
+    fn parses_sctp_address() {
+        let ma = Multiaddr::from_parts(vec![Addr::Sctp(593)]);
+        let parsed = Multiaddr::from_str("/sctp/593").unwrap();
+        assert_eq!(parsed, ma);
+        assert_eq!(parsed.to_string(), "/sctp/593");
     }
 
     #[test]
